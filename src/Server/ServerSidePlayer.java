@@ -8,17 +8,21 @@ import java.net.Socket;
 
 
 class ServerSidePlayer extends Thread {
-    char mark;
+    String playerNumber;
     ServerSidePlayer opponent;
     Socket socket;
     BufferedReader input;
     PrintWriter output;
     ServerSideGame game;
 
+    int pointsPlayer1 = 0;
 
-    public ServerSidePlayer(Socket socket, char mark, ServerSideGame game) {
+    int pointsPlayer2 = 0;
+
+
+    public ServerSidePlayer(Socket socket, String playerName, ServerSideGame game) {
         this.socket = socket;
-        this.mark = mark;
+        this.playerNumber = playerName;
         this.game = game;
         try {
             input = new BufferedReader(
@@ -40,8 +44,26 @@ class ServerSidePlayer extends Thread {
     }
 
 
+    public int getPointsPlayer1() {
+        return pointsPlayer1;
+    }
+
+    public int getPointsPlayer2() {
+        return pointsPlayer2;
+    }
+
+    public void setPointsPlayer1(int pointsPlayer1) {
+        this.pointsPlayer1 = pointsPlayer1;
+    }
+
+    public void setPointsPlayer2(int pointsPlayer2) {
+        this.pointsPlayer2 = pointsPlayer2;
+    }
+
     public void run() {
         try {
+            //Sending playerNumber to clients
+            output.println(playerNumber);
 
             //Print question and alternatives
 
@@ -52,11 +74,22 @@ class ServerSidePlayer extends Thread {
             output.println("Alternativ 4");
 
             //Recieve answer from player
-            String answer = input.readLine();
-            System.out.println(answer);
+            String playerNumberAndAnswerFromClient = input.readLine();
+            System.out.println(playerNumberAndAnswerFromClient);
 
             //Look if answer was correct and give point if true
-
+            String playerNumberFromClient = playerNumberAndAnswerFromClient.substring(0,7);
+            System.out.println(playerNumberFromClient);
+            String answerFromClient = playerNumberAndAnswerFromClient.substring(7);
+            if (playerNumberFromClient == "player1" && answerFromClient == "Alternativ 3"){
+                setPointsPlayer1(getPointsPlayer1() + 1);
+            }
+            if (playerNumberFromClient == "player2" && answerFromClient == "Alternativ 3"){
+              setPointsPlayer2(getPointsPlayer2() + 1);
+            }
+            System.out.println(answerFromClient);
+            System.out.println(getPointsPlayer1());
+            System.out.println(getPointsPlayer2());
 
 
             //Send next question

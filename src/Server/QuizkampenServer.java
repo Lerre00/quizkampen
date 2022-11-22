@@ -9,8 +9,8 @@ public class QuizkampenServer {
             while (true) {
                 ServerSideGame game = new ServerSideGame();
 
-                ServerSidePlayer player1 = new ServerSidePlayer(listener.accept(), '1', game);
-                ServerSidePlayer player2 = new ServerSidePlayer(listener.accept(), '2', game);
+                ServerSidePlayer player1 = new ServerSidePlayer(listener.accept(),"player1" , game);
+                ServerSidePlayer player2 = new ServerSidePlayer(listener.accept(), "player2", game);
 
                 player1.setOpponent(player2);
                 player2.setOpponent(player1);
@@ -18,7 +18,7 @@ public class QuizkampenServer {
                 player1.start();
                 player2.start();
 
-                //ALternativ approach
+                //Alternativ approach
                 //Game2 game2 = new Game2(socket1, socket2);
 
             }

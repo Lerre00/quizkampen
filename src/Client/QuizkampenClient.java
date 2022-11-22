@@ -10,7 +10,7 @@ import java.net.Socket;
 
 import javax.swing.*;
 public class QuizkampenClient extends JFrame implements ActionListener {
-
+    String playerNumber;
     JPanel basePanel = new JPanel();
     JPanel southPanel = new JPanel();
     JPanel northPanel = new JPanel();
@@ -60,6 +60,7 @@ public class QuizkampenClient extends JFrame implements ActionListener {
     }
 
     public void play() throws Exception {
+        playerNumber = in.readLine();
 
         questionFrame.setText(in.readLine());
         button1.setText(in.readLine());
@@ -94,16 +95,17 @@ public class QuizkampenClient extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == button1){
-            out.println(button1.getText());
+
+            out.println(playerNumber + button1.getText());
         }
         if (e.getSource() == button2){
-            out.println(button2.getText());
+            out.println(playerNumber +button2.getText());
         }
         if (e.getSource() == button3){
-            out.println(button3.getText());
+            out.println(playerNumber +button3.getText());
         }
         if (e.getSource() == button4){
-            out.println(button4.getText());
+            out.println(playerNumber +button4.getText());
         }
     }
 }
