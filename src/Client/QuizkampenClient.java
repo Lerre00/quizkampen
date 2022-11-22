@@ -1,21 +1,22 @@
 package Client;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+
 import javax.swing.*;
-public class QuizkampenClient extends JFrame{
+public class QuizkampenClient extends JFrame implements ActionListener {
 
     JPanel basePanel = new JPanel();
     JPanel southPanel = new JPanel();
     JPanel northPanel = new JPanel();
     JPanel northNorthPanel = new JPanel();
     JPanel southNorthPanel = new JPanel();
-    JLabel questionFrame = new JLabel("Vad heter du?");
+    JLabel questionFrame = new JLabel("Waiting for opponent..");
     JButton button1 = new JButton();
     JButton button2 = new JButton();
     JButton button3 = new JButton();
@@ -40,6 +41,10 @@ public class QuizkampenClient extends JFrame{
         southPanel.setLayout(new GridLayout(2,2));
         northPanel.setPreferredSize(new Dimension(100, 100));
         southPanel.setPreferredSize(new Dimension(150, 150));
+        button1.addActionListener(this);
+        button2.addActionListener( this);
+        button3.addActionListener( this);
+        button4.addActionListener( this);
         southPanel.add(button1);
         southPanel.add(button2);
         southPanel.add(button3);
@@ -55,45 +60,13 @@ public class QuizkampenClient extends JFrame{
     }
 
     public void play() throws Exception {
-        String response;
-        char mark = 'S';
-        char opponentMark = 'P';
-        try {
-            response = in.readLine();
-            if (response.startsWith("WELCOME")) {
-                mark = response.charAt(8);
-                opponentMark = (mark == 'X' ? 'O' : 'X');
-                frame.setTitle("Tic Tac Toe - Player " + mark);
-            }
-            while (true) {
-                response = in.readLine();
-                if (response.startsWith("VALID_MOVE")) {
-                    messageLabel.setText("Valid move, please wait");
-                    currentSquare.setText(String.valueOf(mark));
-                    currentSquare.repaint();
-                } else if (response.startsWith("OPPONENT_MOVED")) {
-                    int loc = Integer.parseInt(response.substring(15));
-                    board[loc].setText(String.valueOf(opponentMark));
-                    board[loc].repaint();
-                    messageLabel.setText("Opponent moved, your turn");
-                } else if (response.startsWith("VICTORY")) {
-                    messageLabel.setText("You win");
-                    break;
-                } else if (response.startsWith("DEFEAT")) {
-                    messageLabel.setText("You lose");
-                    break;
-                } else if (response.startsWith("TIE")) {
-                    messageLabel.setText("You tied");
-                    break;
-                } else if (response.startsWith("MESSAGE")) {
-                    messageLabel.setText(response.substring(8));
-                }
-            }
-            out.println("QUIT");
-        }
-        finally {
-            socket.close();
-        }
+        questionFrame.setText(in.readLine());
+        button1.setText(in.readLine());
+        button2.setText(in.readLine());
+        button3.setText(in.readLine());
+        button4.setText(in.readLine());
+
+        in.readLine();
     }
 
     private boolean wantsToPlayAgain() {
@@ -114,6 +87,22 @@ public class QuizkampenClient extends JFrame{
             if (!client.wantsToPlayAgain()) {
                 break;
             }
+        }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == button1){
+            out.println(button1.getText());
+        }
+        if (e.getSource() == button2){
+            out.println(button2.getText());
+        }
+        if (e.getSource() == button3){
+            out.println(button3.getText());
+        }
+        if (e.getSource() == button4){
+            out.println(button4.getText());
         }
     }
 }
