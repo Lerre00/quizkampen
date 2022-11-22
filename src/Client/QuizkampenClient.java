@@ -60,6 +60,7 @@ public class QuizkampenClient extends JFrame implements ActionListener {
     }
 
     public void play() throws Exception {
+
         questionFrame.setText(in.readLine());
         button1.setText(in.readLine());
         button2.setText(in.readLine());

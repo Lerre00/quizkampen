@@ -57,6 +57,8 @@ class ServerSidePlayer extends Thread {
 
             //Look if answer was correct and give point if true
 
+
+
             //Send next question
 
 
