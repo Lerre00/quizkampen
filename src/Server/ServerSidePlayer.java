@@ -67,19 +67,20 @@ class ServerSidePlayer extends Thread {
 
             //Print question and alternatives
 
-            output.println("Hur stor är?");
-            output.println("Alternativ 1");
-            output.println("Alternativ 2");
-            output.println("Alternativ 3");
-            output.println("Alternativ 4");
+            output.println("Hur många ben har en myra?");
+            output.println("2");
+            output.println("4");
+            output.println("6");
+            output.println("8");
+
+            //redundant, same stuff as the lines below, used for getting answer
+            String correctAnswer="6";
 
             //Recieve answer from player
             String playerNumberAndAnswerFromClient = input.readLine();
-            System.out.println(playerNumberAndAnswerFromClient);
 
             //Look if answer was correct and give point if true
             String playerNumberFromClient = playerNumberAndAnswerFromClient.substring(0,7);
-            System.out.println(playerNumberFromClient);
             String answerFromClient = playerNumberAndAnswerFromClient.substring(7);
             if (playerNumberFromClient == "player1" && answerFromClient == "Alternativ 3"){
                 setPointsPlayer1(getPointsPlayer1() + 1);
@@ -87,9 +88,6 @@ class ServerSidePlayer extends Thread {
             if (playerNumberFromClient == "player2" && answerFromClient == "Alternativ 3"){
               setPointsPlayer2(getPointsPlayer2() + 1);
             }
-            System.out.println(answerFromClient);
-            System.out.println(getPointsPlayer1());
-            System.out.println(getPointsPlayer2());
 
 
             //Send next question
@@ -99,11 +97,10 @@ class ServerSidePlayer extends Thread {
 
             // Repeatedly get commands from the client and process them.
             while (true) {
-                String command = input.readLine();
-                if (command.startsWith("MOVE")) {
-                    int location = Integer.parseInt(command.substring(5));
-
-
+                String right = input.readLine().substring(7);
+                System.out.println(input.readLine().substring(7));
+                if (right.equals(correctAnswer)) {
+                    output.println("CORRECT_ANSWER");
                 }
             }
         }catch(IOException e){

@@ -17,6 +17,9 @@ public class QuizkampenClient extends JFrame implements ActionListener {
     JPanel northNorthPanel = new JPanel();
     JPanel southNorthPanel = new JPanel();
     JLabel questionFrame = new JLabel("Waiting for opponent..");
+    JRadioButton radioButton1 = new JRadioButton();
+    JRadioButton radioButton2 = new JRadioButton();
+    JRadioButton radioButton3 = new JRadioButton();
     JButton button1 = new JButton();
     JButton button2 = new JButton();
     JButton button3 = new JButton();
@@ -52,6 +55,9 @@ public class QuizkampenClient extends JFrame implements ActionListener {
         northPanel.add(northNorthPanel, BorderLayout.NORTH);
         northPanel.add(southNorthPanel, BorderLayout.SOUTH);
         southNorthPanel.add(progressBar, BorderLayout.CENTER);
+        northNorthPanel.add(radioButton1);
+        northNorthPanel.add(radioButton2);
+        northNorthPanel.add(radioButton3);
         northNorthPanel.add(questionFrame);
         basePanel.add(northPanel, BorderLayout.NORTH);
         basePanel.add(southPanel);
@@ -67,8 +73,20 @@ public class QuizkampenClient extends JFrame implements ActionListener {
         button2.setText(in.readLine());
         button3.setText(in.readLine());
         button4.setText(in.readLine());
+        String response;
+        try {
+            while (true) {
+                response = in.readLine();
+                if (response.startsWith("CORRECT_ANSWER")) {
+                    radioButton1.setSelected(true);
+                    this.repaint();
+                }
+            }
 
-        in.readLine();
+        }
+        finally {
+            socket.close();
+        }
     }
 
     private boolean wantsToPlayAgain() {
