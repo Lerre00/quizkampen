@@ -8,13 +8,19 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 import javax.swing.*;
-public class QuizkampenClient {
+public class QuizkampenClient extends JFrame{
 
-    private JFrame frame = new JFrame("Tic Tac Toe");
-    private JLabel messageLabel = new JLabel("");
-
-    private Square[] board = new Square[9];
-    private Square currentSquare;
+    JPanel basePanel = new JPanel();
+    JPanel southPanel = new JPanel();
+    JPanel northPanel = new JPanel();
+    JPanel northNorthPanel = new JPanel();
+    JPanel southNorthPanel = new JPanel();
+    JLabel questionFrame = new JLabel("Vad heter du?");
+    JButton button1 = new JButton();
+    JButton button2 = new JButton();
+    JButton button3 = new JButton();
+    JButton button4 = new JButton();
+    JProgressBar progressBar = new JProgressBar();
 
     private static int PORT = 8901;
     private Socket socket;
@@ -28,24 +34,24 @@ public class QuizkampenClient {
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         out = new PrintWriter(socket.getOutputStream(), true);
 
-        // Layout GUI
-        messageLabel.setBackground(Color.lightGray);
-        frame.getContentPane().add(messageLabel, "South");
+        questionFrame.setFont(new Font("Arial", Font.BOLD, 20));
+        basePanel.setLayout(new BorderLayout());
+        northPanel.setLayout(new BorderLayout());
+        southPanel.setLayout(new GridLayout(2,2));
+        northPanel.setPreferredSize(new Dimension(100, 100));
+        southPanel.setPreferredSize(new Dimension(150, 150));
+        southPanel.add(button1);
+        southPanel.add(button2);
+        southPanel.add(button3);
+        southPanel.add(button4);
+        northPanel.add(northNorthPanel, BorderLayout.NORTH);
+        northPanel.add(southNorthPanel, BorderLayout.SOUTH);
+        southNorthPanel.add(progressBar, BorderLayout.CENTER);
+        northNorthPanel.add(questionFrame);
+        basePanel.add(northPanel, BorderLayout.NORTH);
+        basePanel.add(southPanel);
+        add(basePanel);
 
-        JPanel boardPanel = new JPanel();
-        boardPanel.setBackground(Color.black);
-        boardPanel.setLayout(new GridLayout(3, 3, 2, 2));
-        for (int i = 0; i < board.length; i++) {
-            final int j = i;
-            board[i] = new Square();
-            board[i].addMouseListener(new MouseAdapter() {
-                public void mousePressed(MouseEvent e) {
-                    currentSquare = board[j];
-                    out.println("MOVE " + j);}});
-
-            boardPanel.add(board[i]);
-        }
-        frame.getContentPane().add(boardPanel, "Center");
     }
 
     public void play() throws Exception {
@@ -91,35 +97,19 @@ public class QuizkampenClient {
     }
 
     private boolean wantsToPlayAgain() {
-        int response = JOptionPane.showConfirmDialog(frame,
-                "Want to play again?",
-                "Tic Tac Toe is Fun Fun Fun",
-                JOptionPane.YES_NO_OPTION);
-        frame.dispose();
+        int response = JOptionPane.showConfirmDialog(this, "Want to play again?", "Tic Tac Toe is Fun Fun Fun", JOptionPane.YES_NO_OPTION);
+        dispose();
         return response == JOptionPane.YES_OPTION;
-    }
-
-    static class Square extends JPanel {
-        JLabel label = new JLabel();
-
-        public Square() {
-            setBackground(Color.white);
-            add(label);
-        }
-
-        public void setText(String s) {
-            label.setText(s);
-        }
     }
 
     public static void main(String[] args) throws Exception {
         while (true) {
             String serverAddress = (args.length == 0) ? "localhost" : args[1];
             QuizkampenClient client = new QuizkampenClient(serverAddress);
-            client.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            client.frame.setSize(240, 160);
-            client.frame.setVisible(true);
-            client.frame.setResizable(true);
+            client.setSize(350,350);
+            client.setLocation(100,100);
+            client.setVisible(true);
+            client.setDefaultCloseOperation(EXIT_ON_CLOSE);
             client.play();
             if (!client.wantsToPlayAgain()) {
                 break;
