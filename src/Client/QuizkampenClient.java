@@ -21,15 +21,11 @@ public class QuizkampenClient {
     private BufferedReader in;
     private PrintWriter out;
 
-    /**
-     * Constructs the client by connecting to a server, laying out the
-     * GUI and registering GUI listeners.
-     */
+
     public QuizkampenClient(String serverAddress) throws Exception {
 
         socket = new Socket(serverAddress, PORT);
-        in = new BufferedReader(new InputStreamReader(
-                socket.getInputStream()));
+        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         out = new PrintWriter(socket.getOutputStream(), true);
 
         // Layout GUI
@@ -52,19 +48,6 @@ public class QuizkampenClient {
         frame.getContentPane().add(boardPanel, "Center");
     }
 
-    /**
-     * The main thread of the client will listen for messages
-     * from the server. The first message will be a "WELCOME"
-     * message in which we receive our mark. Then we go into a
-     * loop listening for "VALID_MOVE", "OPPONENT_MOVED", "VICTORY",
-     * "DEFEAT", "TIE", "OPPONENT_QUIT or "MESSAGE" messages,
-     * and handling each message appropriately. The "VICTORY",
-     * "DEFEAT" and "TIE" ask the user whether or not to play
-     * another game. If the answer is no, the loop is exited and
-     * the server is sent a "QUIT" message. If an OPPONENT_QUIT
-     * message is recevied then the loop will exit and the server
-     * will be sent a "QUIT" message also.
-     */
     public void play() throws Exception {
         String response;
         char mark = 'S';
@@ -116,11 +99,6 @@ public class QuizkampenClient {
         return response == JOptionPane.YES_OPTION;
     }
 
-    /**
-     * Graphical square in the client window. Each square is
-     * a white panel containing. A client calls setText() to fill
-     * it with an X or O.
-     */
     static class Square extends JPanel {
         JLabel label = new JLabel();
 
@@ -134,9 +112,6 @@ public class QuizkampenClient {
         }
     }
 
-    /**
-     * Runs the client as an application.
-     */
     public static void main(String[] args) throws Exception {
         while (true) {
             String serverAddress = (args.length == 0) ? "localhost" : args[1];
