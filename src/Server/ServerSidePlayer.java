@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Objects;
 
 
 public class ServerSidePlayer extends Thread {
@@ -15,7 +16,6 @@ public class ServerSidePlayer extends Thread {
     PrintWriter output;
     ServerSideGame game;
     int pointsPlayer1 = 0;
-
     int pointsPlayer2 = 0;
 
 
@@ -60,46 +60,57 @@ public class ServerSidePlayer extends Thread {
     }
 
     public void run() {
+
         //Sending playerNumber to clients
         output.println(playerNumber);
 
-
-        //Print question and alternatives
-        output.println(Question.getTestQuestion().getQuestion());
-
-        output.println(Question.getTestQuestion().getWrongAlternative1());
-        output.println(Question.getTestQuestion().getWrongAlternative2());
-        output.println(Question.getTestQuestion().getWrongAlternative3());
-
-        output.println(Question.getTestQuestion().getRightAlternative());
-
-        //Correct answer
-        String correctAnswer = Question.getTestQuestion().getRightAlternative();
-
-        try {
-            //Receive answer from player
-            String playerNumberAndAnswerFromClient = input.readLine();
+        for (int i = 0; i < 3; i++) {
 
 
-            //Look if answer was correct and give point if true
-            String playerNumberFromClient = playerNumberAndAnswerFromClient.substring(0, 7);
-            String answerFromClient = playerNumberAndAnswerFromClient.substring(7);
-            if (playerNumberFromClient.equals("player1") && answerFromClient.equals(correctAnswer)) {
-                setPointsPlayer1(getPointsPlayer1() + 1);
+            //Print question and alternatives
+            output.println(Question.getTestQuestion().getQuestion());
+
+            output.println(Question.getTestQuestion().getWrongAlternative1());
+            output.println(Question.getTestQuestion().getWrongAlternative2());
+            output.println(Question.getTestQuestion().getWrongAlternative3());
+
+            output.println(Question.getTestQuestion().getRightAlternative());
+
+            //Correct answer
+            String correctAnswer = Question.getTestQuestion().getRightAlternative();
+
+            try {
+                //Receive answer from player
+                String playerNumberAndAnswerFromClient = input.readLine();
+
+
+                //Look if answer was correct and give point if true
+                String playerNumberFromClient = playerNumberAndAnswerFromClient.substring(0, 7);
+                String answerFromClient = playerNumberAndAnswerFromClient.substring(7);
+                if (playerNumberFromClient.equals("player1") && answerFromClient.equals(correctAnswer)) {
+                    setPointsPlayer1(getPointsPlayer1() + 1);
+                }
+                if (playerNumberFromClient.equals("player2") && answerFromClient.equals(correctAnswer)) {
+                    setPointsPlayer2(getPointsPlayer2() + 1);
+                }
+
+                //Send back client answer
+                output.println(answerFromClient);
+                System.out.println(playerNumberFromClient + " answer: " + answerFromClient);
+                sleep(5000);
+
+            } catch (IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+
             }
-            if (playerNumberFromClient.equals("player2") && answerFromClient.equals(correctAnswer)) {
-                setPointsPlayer2(getPointsPlayer2() + 1);
-            }
-
-            //Send back client answer
-            output.println(answerFromClient);
-            System.out.println(pointsPlayer1 + pointsPlayer2);
-            System.out.println(playerNumberFromClient + " answer: " + answerFromClient);
-
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
 
         }
+        if (Objects.equals(playerNumber, "player1")){
+        output.println(pointsPlayer1);
+        }else{
+            output.println(pointsPlayer2);
+        }
+
+        System.out.println(pointsPlayer1 + pointsPlayer2);
     }
 }

@@ -1,6 +1,8 @@
 package Client;
 
 
+import Server.Question;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,6 +12,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Objects;
 import javax.swing.*;
 
 public class QuizkampenClient extends JFrame implements ActionListener {
@@ -108,61 +111,44 @@ public class QuizkampenClient extends JFrame implements ActionListener {
     public void play() throws Exception {
         playerNumber = in.readLine();
 
-        String question = in.readLine();
-        String wrongAlternative1 = in.readLine();
-        String wrongAlternative2 = in.readLine();
-        String wrongAlternative3 = in.readLine();
-        String rightAlternative = in.readLine();
+        for (int i = 0; i < 3; i++) {
+            String question = in.readLine();
+            String wrongAlternative1 = in.readLine();
+            String wrongAlternative2 = in.readLine();
+            String wrongAlternative3 = in.readLine();
+            String rightAlternative = in.readLine();
 
-        ArrayList <String> allAlternatives = new ArrayList<>();
-        allAlternatives.add(wrongAlternative1);
-        allAlternatives.add(wrongAlternative2);
-        allAlternatives.add(wrongAlternative3);
-        allAlternatives.add(rightAlternative);
+            ArrayList<String> allAlternatives = new ArrayList<>();
+            allAlternatives.add(wrongAlternative1);
+            allAlternatives.add(wrongAlternative2);
+            allAlternatives.add(wrongAlternative3);
+            allAlternatives.add(rightAlternative);
 
-        Collections.shuffle(allAlternatives);
+            Collections.shuffle(allAlternatives);
 
-        questionFrame.setText(question);
-        button1.setText(allAlternatives.get(0));
-        button2.setText(allAlternatives.get(1));
-        button3.setText(allAlternatives.get(2));
-        button4.setText(allAlternatives.get(3));
+            questionFrame.setText(question);
+            button1.setText(allAlternatives.get(0));
+            button2.setText(allAlternatives.get(1));
+            button3.setText(allAlternatives.get(2));
+            button4.setText(allAlternatives.get(3));
 
-
-        if(rightAlternative == in.readLine()){
-            radioButton1.setSelected(true);
-            questionFrame.setText("Rätt svar!");
-        } else {
-            questionFrame.setText("Fel svar!");
-        }
-
-        //take response from server, update client with info if answer is true or false
-        /*
-        String response;
-        try {
-            while (true) {
-                response = in.readLine();
-                if (response.equals("CORRECT_ANSWER") && playerNumber.equals("player1")) {
-                    System.out.println(playerNumber);
-                    radioButton1.setSelected(true);
-                    questionFrame.setText("Rätt svar!");
-                    this.repaint();
-                }
-                if (response.equals("CORRECT_ANSWER") && playerNumber.equals("player2")) {
-                    System.out.println(playerNumber);
-                    opponentRadioButton1.setSelected(true);
-                    questionFrame.setText("Rätt svar!");
-                    this.repaint();
-                }
-                if (response.equals("INCORRECT_ANSWER")) {
-                    questionFrame.setText("Fel svar");
-                    this.repaint();
-                }
+            String playerAnswerFromServer = in.readLine();
+            System.out.println(playerAnswerFromServer);
+            System.out.println(rightAlternative);
+            if (Objects.equals(playerAnswerFromServer, rightAlternative)) {
+                radioButton1.setSelected(true);
+                questionFrame.setText("Rätt svar!");
+            } else {
+                questionFrame.setText("Fel svar!");
             }
+        }
+        String yourPoints = in.readLine();
+        questionFrame.setText("Du fick " + yourPoints + "/3 poäng");
 
-        } finally {
-            socket.close();
-        }*/
+
+        in.readLine();
+
+
     }
 
     private boolean wantsToPlayAgain() {
