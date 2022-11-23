@@ -64,8 +64,8 @@ public class ServerSidePlayer extends Thread {
             //Sending playerNumber to clients
             output.println(playerNumber);
 
-            //Print question and alternatives
 
+            //Print question and alternatives
             output.println("Hur många ben har en myra?");
             output.println("2");
             output.println("4");
