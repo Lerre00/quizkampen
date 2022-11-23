@@ -1,17 +1,15 @@
 package Client;
-import Server.ServerSidePlayer;
+
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-
-
 import javax.swing.*;
+
 public class QuizkampenClient extends JFrame implements ActionListener {
     String playerNumber;
     JPanel basePanel = new JPanel();
@@ -168,16 +166,16 @@ public class QuizkampenClient extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e)  {
         if (e.getSource() == button1){
-            out.println(playerNumber + "1");
+            out.println(playerNumber + button1.getText());
         }
         if (e.getSource() == button2){
-            out.println(playerNumber + "2");
+            out.println(playerNumber + button2.getText());
         }
         if (e.getSource() == button3){
-            out.println(playerNumber + "3");
+            out.println(playerNumber + button3.getText());
         }
         if (e.getSource() == button4){
-            out.println(playerNumber + "4");
+            out.println(playerNumber + button4.getText());
         }
     }
 }

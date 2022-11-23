@@ -66,14 +66,14 @@ public class ServerSidePlayer extends Thread {
 
 
             //Print question and alternatives
-            output.println("Hur många ben har en myra?");
-            output.println("2");
-            output.println("4");
-            output.println("6");
-            output.println("8");
+            output.println(Question.getTestQuestion().getQuestion());
+            output.println(Question.getTestQuestion().getWrongAlternative1());
+            output.println(Question.getTestQuestion().getWrongAlternative2());
+            output.println(Question.getTestQuestion().getRightAlternative());
+            output.println(Question.getTestQuestion().getWrongAlternative3());
 
             //button 3. answer is not actually 3
-            String correctAnswer="3";
+            String correctAnswer = Question.getTestQuestion().getRightAlternative();
 
             // Repeatedly get commands from the client and process them.
             while (true) {
