@@ -60,66 +60,46 @@ public class ServerSidePlayer extends Thread {
     }
 
     public void run() {
+        //Sending playerNumber to clients
+        output.println(playerNumber);
+
+
+        //Print question and alternatives
+        output.println(Question.getTestQuestion().getQuestion());
+
+        output.println(Question.getTestQuestion().getWrongAlternative1());
+        output.println(Question.getTestQuestion().getWrongAlternative2());
+        output.println(Question.getTestQuestion().getWrongAlternative3());
+
+        output.println(Question.getTestQuestion().getRightAlternative());
+
+        //Correct answer
+        String correctAnswer = Question.getTestQuestion().getRightAlternative();
+
         try {
-            //Sending playerNumber to clients
-            output.println(playerNumber);
+            //Receive answer from player
+            String playerNumberAndAnswerFromClient = input.readLine();
 
 
-            //Print question and alternatives
-            output.println(Question.getTestQuestion().getQuestion());
-            output.println(Question.getTestQuestion().getWrongAlternative1());
-            output.println(Question.getTestQuestion().getWrongAlternative2());
-            output.println(Question.getTestQuestion().getRightAlternative());
-            output.println(Question.getTestQuestion().getWrongAlternative3());
-
-            //button 3. answer is not actually 3
-            String correctAnswer = Question.getTestQuestion().getRightAlternative();
-
-            // Repeatedly get commands from the client and process them.
-            while (true) {
-                //Recieve answer from player
-                String playerNumberAndAnswerFromClient = input.readLine();
-
-                //Look if answer was correct and give point if true
-                String playerNumberFromClient = playerNumberAndAnswerFromClient.substring(0, 7);
-                String answerFromClient = playerNumberAndAnswerFromClient.substring(7);
-                if (playerNumberFromClient.equals("player1") && answerFromClient.equals(correctAnswer)) {
-                    setPointsPlayer1(getPointsPlayer1() + 1);
-                    output.println("CORRECT_ANSWER");
-                }
-                if (playerNumberFromClient.equals("player1") && !answerFromClient.equals(correctAnswer)) {
-                    output.println("INCORRECT_ANSWER");
-                }
-                if (playerNumberFromClient.equals("player2") && answerFromClient.equals(correctAnswer)) {
-                    setPointsPlayer2(getPointsPlayer2() + 1);
-                    output.println("CORRECT_ANSWER");
-                }
-                if (playerNumberFromClient.equals("player2") && !answerFromClient.equals(correctAnswer)) {
-                    output.println("INCORRECT_ANSWER");
-                }
-
-                System.out.println(playerNumberFromClient + " answer: " + answerFromClient);
-
+            //Look if answer was correct and give point if true
+            String playerNumberFromClient = playerNumberAndAnswerFromClient.substring(0, 7);
+            String answerFromClient = playerNumberAndAnswerFromClient.substring(7);
+            if (playerNumberFromClient.equals("player1") && answerFromClient.equals(correctAnswer)) {
+                setPointsPlayer1(getPointsPlayer1() + 1);
+            }
+            if (playerNumberFromClient.equals("player2") && answerFromClient.equals(correctAnswer)) {
+                setPointsPlayer2(getPointsPlayer2() + 1);
             }
 
+            //Send back client answer
+            output.println(answerFromClient);
+            System.out.println(pointsPlayer1 + pointsPlayer2);
+            System.out.println(playerNumberFromClient + " answer: " + answerFromClient);
 
 
+        } catch (IOException e) {
+            throw new RuntimeException(e);
 
-            //Send next question
-
-
-
-
-            // Repeatedly get commands from the client and process them.
-//            while (true) {
-//                String right = input.readLine().substring(7);
-//                System.out.println(input.readLine().substring(7) + "test");
-//                if (answerFromClient.equals(correctAnswer)) {
-//                    output.println("CORRECT_ANSWER");
-//                }
-//            }
-        }catch(IOException e){
-            e.printStackTrace();
         }
     }
 }

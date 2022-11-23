@@ -8,6 +8,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
 import javax.swing.*;
 
 public class QuizkampenClient extends JFrame implements ActionListener {
@@ -61,8 +63,8 @@ public class QuizkampenClient extends JFrame implements ActionListener {
         northPanel.setLayout(new BorderLayout());
         northNorthPanel.setLayout(new BorderLayout());
         eastNorthNorthPanel.setLayout(new GridLayout(3, 1));
-        westNorthNorthPanel.setLayout(new GridLayout(3,1));
-        southPanel.setLayout(new GridLayout(2,2));
+        westNorthNorthPanel.setLayout(new GridLayout(3, 1));
+        southPanel.setLayout(new GridLayout(2, 2));
 
         northPanel.setPreferredSize(new Dimension(100, 150));
         southPanel.setPreferredSize(new Dimension(150, 100));
@@ -106,14 +108,36 @@ public class QuizkampenClient extends JFrame implements ActionListener {
     public void play() throws Exception {
         playerNumber = in.readLine();
 
-        questionFrame.setText(in.readLine());
-        button1.setText(in.readLine());
-        button2.setText(in.readLine());
-        button3.setText(in.readLine());
-        button4.setText(in.readLine());
+        String question = in.readLine();
+        String wrongAlternative1 = in.readLine();
+        String wrongAlternative2 = in.readLine();
+        String wrongAlternative3 = in.readLine();
+        String rightAlternative = in.readLine();
 
+        ArrayList <String> allAlternatives = new ArrayList<>();
+        allAlternatives.add(wrongAlternative1);
+        allAlternatives.add(wrongAlternative2);
+        allAlternatives.add(wrongAlternative3);
+        allAlternatives.add(rightAlternative);
+
+        Collections.shuffle(allAlternatives);
+
+        questionFrame.setText(question);
+        button1.setText(allAlternatives.get(0));
+        button2.setText(allAlternatives.get(1));
+        button3.setText(allAlternatives.get(2));
+        button4.setText(allAlternatives.get(3));
+
+
+        if(rightAlternative == in.readLine()){
+            radioButton1.setSelected(true);
+            questionFrame.setText("Rätt svar!");
+        } else {
+            questionFrame.setText("Fel svar!");
+        }
 
         //take response from server, update client with info if answer is true or false
+        /*
         String response;
         try {
             while (true) {
@@ -136,10 +160,9 @@ public class QuizkampenClient extends JFrame implements ActionListener {
                 }
             }
 
-        }
-        finally {
+        } finally {
             socket.close();
-        }
+        }*/
     }
 
     private boolean wantsToPlayAgain() {
@@ -152,8 +175,8 @@ public class QuizkampenClient extends JFrame implements ActionListener {
         while (true) {
             String serverAddress = (args.length == 0) ? "localhost" : args[1];
             QuizkampenClient client = new QuizkampenClient(serverAddress);
-            client.setSize(350,300);
-            client.setLocation(100,100);
+            client.setSize(350, 300);
+            client.setLocation(100, 100);
             client.setVisible(true);
             client.setDefaultCloseOperation(EXIT_ON_CLOSE);
             client.play();
@@ -164,17 +187,17 @@ public class QuizkampenClient extends JFrame implements ActionListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e)  {
-        if (e.getSource() == button1){
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == button1) {
             out.println(playerNumber + button1.getText());
         }
-        if (e.getSource() == button2){
+        if (e.getSource() == button2) {
             out.println(playerNumber + button2.getText());
         }
-        if (e.getSource() == button3){
+        if (e.getSource() == button3) {
             out.println(playerNumber + button3.getText());
         }
-        if (e.getSource() == button4){
+        if (e.getSource() == button4) {
             out.println(playerNumber + button4.getText());
         }
     }
