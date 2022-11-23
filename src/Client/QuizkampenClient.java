@@ -120,8 +120,15 @@ public class QuizkampenClient extends JFrame implements ActionListener {
         try {
             while (true) {
                 response = in.readLine();
-                if (response.equals("CORRECT_ANSWER")) {
+                if (response.equals("CORRECT_ANSWER") && playerNumber.equals("player1")) {
+                    System.out.println(playerNumber);
                     radioButton1.setSelected(true);
+                    questionFrame.setText("Rätt svar!");
+                    this.repaint();
+                }
+                if (response.equals("CORRECT_ANSWER") && playerNumber.equals("player2")) {
+                    System.out.println(playerNumber);
+                    opponentRadioButton1.setSelected(true);
                     questionFrame.setText("Rätt svar!");
                     this.repaint();
                 }
