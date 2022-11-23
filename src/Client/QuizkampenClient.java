@@ -1,8 +1,11 @@
 package Client;
+import Server.ServerSidePlayer;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -26,10 +29,12 @@ public class QuizkampenClient extends JFrame implements ActionListener {
     JButton button4 = new JButton();
     JProgressBar progressBar = new JProgressBar();
 
+
     private static int PORT = 8901;
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
+    String response;
 
 
     public QuizkampenClient(String serverAddress) throws Exception {
@@ -58,7 +63,7 @@ public class QuizkampenClient extends JFrame implements ActionListener {
         northNorthPanel.add(radioButton1);
         northNorthPanel.add(radioButton2);
         northNorthPanel.add(radioButton3);
-        northNorthPanel.add(questionFrame);
+        northPanel.add(questionFrame);
         basePanel.add(northPanel, BorderLayout.NORTH);
         basePanel.add(southPanel);
         add(basePanel);
@@ -73,12 +78,20 @@ public class QuizkampenClient extends JFrame implements ActionListener {
         button2.setText(in.readLine());
         button3.setText(in.readLine());
         button4.setText(in.readLine());
+
+
+        //take response from server, update client with info if answer is true or false
         String response;
         try {
             while (true) {
                 response = in.readLine();
-                if (response.startsWith("CORRECT_ANSWER")) {
+                if (response.equals("CORRECT_ANSWER")) {
                     radioButton1.setSelected(true);
+                    questionFrame.setText("Rätt svar!");
+                    this.repaint();
+                }
+                if (response.equals("INCORRECT_ANSWER")) {
+                    questionFrame.setText("Fel svar");
                     this.repaint();
                 }
             }
@@ -111,19 +124,18 @@ public class QuizkampenClient extends JFrame implements ActionListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(ActionEvent e)  {
         if (e.getSource() == button1){
-
-            out.println(playerNumber + button1.getText());
+            out.println(playerNumber + "1");
         }
         if (e.getSource() == button2){
-            out.println(playerNumber +button2.getText());
+            out.println(playerNumber + "2");
         }
         if (e.getSource() == button3){
-            out.println(playerNumber +button3.getText());
+            out.println(playerNumber + "3");
         }
         if (e.getSource() == button4){
-            out.println(playerNumber +button4.getText());
+            out.println(playerNumber + "4");
         }
     }
 }
