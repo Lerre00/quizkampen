@@ -1,0 +1,257 @@
+Index: src/Server/ServerSidePlayer.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package Server;\n\nimport java.io.BufferedReader;\nimport java.io.IOException;\nimport java.io.InputStreamReader;\nimport java.io.PrintWriter;\nimport java.net.Socket;\n\n\n/**\n * The class for the helper threads in this multithreaded server\n * application. A Player is identified by a character mark\n * which is either 'X' or 'O'. For communication with the\n * client the player has a socket with its input and output\n * streams. Since only text is being communicated we use a\n * reader and a writer.\n */\nclass ServerSidePlayer extends Thread {\n    char mark;\n    ServerSidePlayer opponent;\n    Socket socket;\n    BufferedReader input;\n    PrintWriter output;\n    ServerSideGame game;\n\n    /**\n     * Constructs a handler thread for a given socket and mark\n     * initializes the stream fields, displays the first two\n     * welcoming messages.\n     */\n    public ServerSidePlayer(Socket socket, char mark, ServerSideGame game) {\n        this.socket = socket;\n        this.mark = mark;\n        this.game = game;\n        try {\n            input = new BufferedReader(\n                    new InputStreamReader(socket.getInputStream()));\n            output = new PrintWriter(socket.getOutputStream(), true);\n            output.println(\"WELCOME \" + mark);\n            output.println(\"MESSAGE Waiting for opponent to connect\");\n        } catch (IOException e) {\n            System.out.println(\"Player died: \" + e);\n        }\n    }\n\n    /**\n     * Accepts notification of who the opponent is.\n     */\n    public void setOpponent(ServerSidePlayer opponent) {\n        this.opponent = opponent;\n    }\n\n    /**\n     * Returns the opponent.\n     */\n    public ServerSidePlayer getOpponent() {\n        return opponent;\n    }\n\n    /**\n     * Handles the otherPlayerMoved message.\n     */\n    public void otherPlayerMoved(int location) {\n        output.println(\"OPPONENT_MOVED \" + location);\n\n        if (game.hasWinner()){\n            output.println(\"DEFEAT\");\n        }\n        else{\n            if (game.boardFilledUp()){\n                output.println(\"TIE\");\n            }\n            else{\n                output.println(\"\");\n            }\n        }\n    }\n\n    /**\n     * The run method of this thread.\n     */\n    public void run() {\n        try {\n            // The thread is only started after everyone connects.\n            output.println(\"MESSAGE All players connected\");\n\n            // Tell the first player that it is her turn.\n            if (mark == 'X') {\n                output.println(\"MESSAGE Your move\");\n            }\n\n            // Repeatedly get commands from the client and process them.\n            while (true) {\n                String command = input.readLine();\n                if (command.startsWith(\"MOVE\")) {\n                    int location = Integer.parseInt(command.substring(5));\n                    if (game.legalMove(location, this)) {\n                        output.println(\"VALID_MOVE\");\n                        output.println(game.hasWinner() ? \"VICTORY\"\n                                : game.boardFilledUp() ? \"TIE\"\n                                : \"\");\n                    } else {\n                        output.println(\"MESSAGE ?\");\n                    }\n                } else if (command.startsWith(\"QUIT\")) {\n                    return;\n                }\n            }\n        } catch (IOException e) {\n            System.out.println(\"Player died: \" + e);\n        } finally {\n            try {socket.close();} catch (IOException e) {}\n        }\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/Server/ServerSidePlayer.java b/src/Server/ServerSidePlayer.java
+--- a/src/Server/ServerSidePlayer.java	(revision 5f895cc2a534cf6fc9ee54b063fdc09c3df64c1a)
++++ b/src/Server/ServerSidePlayer.java	(date 1669124639053)
+@@ -7,14 +7,6 @@
+ import java.net.Socket;
+ 
+ 
+-/**
+- * The class for the helper threads in this multithreaded server
+- * application. A Player is identified by a character mark
+- * which is either 'X' or 'O'. For communication with the
+- * client the player has a socket with its input and output
+- * streams. Since only text is being communicated we use a
+- * reader and a writer.
+- */
+ class ServerSidePlayer extends Thread {
+     char mark;
+     ServerSidePlayer opponent;
+@@ -23,11 +15,7 @@
+     PrintWriter output;
+     ServerSideGame game;
+ 
+-    /**
+-     * Constructs a handler thread for a given socket and mark
+-     * initializes the stream fields, displays the first two
+-     * welcoming messages.
+-     */
++
+     public ServerSidePlayer(Socket socket, char mark, ServerSideGame game) {
+         this.socket = socket;
+         this.mark = mark;
+@@ -43,42 +31,18 @@
+         }
+     }
+ 
+-    /**
+-     * Accepts notification of who the opponent is.
+-     */
++
+     public void setOpponent(ServerSidePlayer opponent) {
+         this.opponent = opponent;
+     }
+ 
+-    /**
+-     * Returns the opponent.
+-     */
++
+     public ServerSidePlayer getOpponent() {
+         return opponent;
+     }
+ 
+-    /**
+-     * Handles the otherPlayerMoved message.
+-     */
+-    public void otherPlayerMoved(int location) {
+-        output.println("OPPONENT_MOVED " + location);
+ 
+-        if (game.hasWinner()){
+-            output.println("DEFEAT");
+-        }
+-        else{
+-            if (game.boardFilledUp()){
+-                output.println("TIE");
+-            }
+-            else{
+-                output.println("");
+-            }
+-        }
+-    }
+ 
+-    /**
+-     * The run method of this thread.
+-     */
+     public void run() {
+         try {
+             // The thread is only started after everyone connects.
+Index: src/Server/QuizkampenServer.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package Server;\n\nimport java.net.ServerSocket;\n\n/**\n * A server for a network multi-player tic tac toe game. Modified and\n * extended from the class presented in Deitel and Deitel \"Java How to\n * Program\" book. I made a bunch of enhancements and rewrote large sections\n * of the code. The main change is instead of passing *data* between the\n * client and server, I made a TTTP (tic tac toe protocol) which is totally\n * plain text, so you can test the game with Telnet (always a good idea.)\n * The strings that are sent in TTTP are:\n *\n * Client -> Server        Server -> Client\n * ----------------------  ----------\n * MOVE <n> (0 <= n <= 8)  WELCOME <char> (char in {X, O})\n * QUIT                    VALID_MOVE\n *                         OTHER_PLAYER_MOVED <n>\n *                         VICTORY\n *                         DEFEAT\n *                         TIE\n *                         MESSAGE <text>\n *\n * A second change is that it allows an unlimited number of pairs of\n * players to play.\n */\npublic class QuizkampenServer {\n\n    /**\n     * Runs the application. Pairs up clients that connect.\n     */\n    public static void main(String[] args) throws Exception {\n        ServerSocket listener = new ServerSocket(8901);\n        System.out.println(\"Tic Tac Toe Server is Running\");\n        try {\n            while (true) {\n                ServerSideGame game = new ServerSideGame();\n\n                ServerSidePlayer playerX = new ServerSidePlayer(listener.accept(), 'X', game);\n                ServerSidePlayer playerO = new ServerSidePlayer(listener.accept(), 'O', game);\n\n                playerX.setOpponent(playerO);\n                playerO.setOpponent(playerX);\n                game.currentPlayer = playerX;\n                playerX.start();\n                playerO.start();\n\n                //ALternativ approach\n                //Game2 game2 = new Game2(socket1, socket2);\n\n            }\n        } finally {\n            listener.close();\n        }\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/Server/QuizkampenServer.java b/src/Server/QuizkampenServer.java
+--- a/src/Server/QuizkampenServer.java	(revision 5f895cc2a534cf6fc9ee54b063fdc09c3df64c1a)
++++ b/src/Server/QuizkampenServer.java	(date 1669124639035)
+@@ -1,43 +1,16 @@
+ package Server;
+ 
+ import java.net.ServerSocket;
+-
+-/**
+- * A server for a network multi-player tic tac toe game. Modified and
+- * extended from the class presented in Deitel and Deitel "Java How to
+- * Program" book. I made a bunch of enhancements and rewrote large sections
+- * of the code. The main change is instead of passing *data* between the
+- * client and server, I made a TTTP (tic tac toe protocol) which is totally
+- * plain text, so you can test the game with Telnet (always a good idea.)
+- * The strings that are sent in TTTP are:
+- *
+- * Client -> Server        Server -> Client
+- * ----------------------  ----------
+- * MOVE <n> (0 <= n <= 8)  WELCOME <char> (char in {X, O})
+- * QUIT                    VALID_MOVE
+- *                         OTHER_PLAYER_MOVED <n>
+- *                         VICTORY
+- *                         DEFEAT
+- *                         TIE
+- *                         MESSAGE <text>
+- *
+- * A second change is that it allows an unlimited number of pairs of
+- * players to play.
+- */
+ public class QuizkampenServer {
+-
+-    /**
+-     * Runs the application. Pairs up clients that connect.
+-     */
+     public static void main(String[] args) throws Exception {
+         ServerSocket listener = new ServerSocket(8901);
+-        System.out.println("Tic Tac Toe Server is Running");
++        System.out.println("Quizkampen Server is Running");
+         try {
+             while (true) {
+                 ServerSideGame game = new ServerSideGame();
+ 
+                 ServerSidePlayer playerX = new ServerSidePlayer(listener.accept(), 'X', game);
+-                ServerSidePlayer playerO = new ServerSidePlayer(listener.accept(), 'O', game);
++                ServerSidePlayer playerO = new ServerSidePlayer(listener.accept(), 'L', game);
+ 
+                 playerX.setOpponent(playerO);
+                 playerO.setOpponent(playerX);
+Index: src/Client/QuizkampenClient.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package Client;\nimport java.awt.*;\nimport java.awt.event.MouseAdapter;\nimport java.awt.event.MouseEvent;\nimport java.io.BufferedReader;\nimport java.io.InputStreamReader;\nimport java.io.PrintWriter;\nimport java.net.Socket;\n\nimport javax.swing.*;\npublic class QuizkampenClient {\n\n    private JFrame frame = new JFrame(\"Tic Tac Toe\");\n    private JLabel messageLabel = new JLabel(\"\");\n\n    private Square[] board = new Square[9];\n    private Square currentSquare;\n\n    private static int PORT = 8901;\n    private Socket socket;\n    private BufferedReader in;\n    private PrintWriter out;\n\n\n    public QuizkampenClient(String serverAddress) throws Exception {\n\n        socket = new Socket(serverAddress, PORT);\n        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));\n        out = new PrintWriter(socket.getOutputStream(), true);\n\n        // Layout GUI\n        messageLabel.setBackground(Color.lightGray);\n        frame.getContentPane().add(messageLabel, \"South\");\n\n        JPanel boardPanel = new JPanel();\n        boardPanel.setBackground(Color.black);\n        boardPanel.setLayout(new GridLayout(3, 3, 2, 2));\n        for (int i = 0; i < board.length; i++) {\n            final int j = i;\n            board[i] = new Square();\n            board[i].addMouseListener(new MouseAdapter() {\n                public void mousePressed(MouseEvent e) {\n                    currentSquare = board[j];\n                    out.println(\"MOVE \" + j);}});\n\n            boardPanel.add(board[i]);\n        }\n        frame.getContentPane().add(boardPanel, \"Center\");\n    }\n\n    public void play() throws Exception {\n        String response;\n        char mark = 'S';\n        char opponentMark = 'P';\n        try {\n            response = in.readLine();\n            if (response.startsWith(\"WELCOME\")) {\n                mark = response.charAt(8);\n                opponentMark = (mark == 'X' ? 'O' : 'X');\n                frame.setTitle(\"Tic Tac Toe - Player \" + mark);\n            }\n            while (true) {\n                response = in.readLine();\n                if (response.startsWith(\"VALID_MOVE\")) {\n                    messageLabel.setText(\"Valid move, please wait\");\n                    currentSquare.setText(String.valueOf(mark));\n                    currentSquare.repaint();\n                } else if (response.startsWith(\"OPPONENT_MOVED\")) {\n                    int loc = Integer.parseInt(response.substring(15));\n                    board[loc].setText(String.valueOf(opponentMark));\n                    board[loc].repaint();\n                    messageLabel.setText(\"Opponent moved, your turn\");\n                } else if (response.startsWith(\"VICTORY\")) {\n                    messageLabel.setText(\"You win\");\n                    break;\n                } else if (response.startsWith(\"DEFEAT\")) {\n                    messageLabel.setText(\"You lose\");\n                    break;\n                } else if (response.startsWith(\"TIE\")) {\n                    messageLabel.setText(\"You tied\");\n                    break;\n                } else if (response.startsWith(\"MESSAGE\")) {\n                    messageLabel.setText(response.substring(8));\n                }\n            }\n            out.println(\"QUIT\");\n        }\n        finally {\n            socket.close();\n        }\n    }\n\n    private boolean wantsToPlayAgain() {\n        int response = JOptionPane.showConfirmDialog(frame,\n                \"Want to play again?\",\n                \"Tic Tac Toe is Fun Fun Fun\",\n                JOptionPane.YES_NO_OPTION);\n        frame.dispose();\n        return response == JOptionPane.YES_OPTION;\n    }\n\n    static class Square extends JPanel {\n        JLabel label = new JLabel();\n\n        public Square() {\n            setBackground(Color.white);\n            add(label);\n        }\n\n        public void setText(String s) {\n            label.setText(s);\n        }\n    }\n\n    public static void main(String[] args) throws Exception {\n        while (true) {\n            String serverAddress = (args.length == 0) ? \"localhost\" : args[1];\n            QuizkampenClient client = new QuizkampenClient(serverAddress);\n            client.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\n            client.frame.setSize(240, 160);\n            client.frame.setVisible(true);\n            client.frame.setResizable(true);\n            client.play();\n            if (!client.wantsToPlayAgain()) {\n                break;\n            }\n        }\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/Client/QuizkampenClient.java b/src/Client/QuizkampenClient.java
+--- a/src/Client/QuizkampenClient.java	(revision 5f895cc2a534cf6fc9ee54b063fdc09c3df64c1a)
++++ b/src/Client/QuizkampenClient.java	(date 1669124726764)
+@@ -9,13 +9,11 @@
+ 
+ import javax.swing.*;
+ public class QuizkampenClient {
+-
+     private JFrame frame = new JFrame("Tic Tac Toe");
+     private JLabel messageLabel = new JLabel("");
+ 
+     private Square[] board = new Square[9];
+     private Square currentSquare;
+-
+     private static int PORT = 8901;
+     private Socket socket;
+     private BufferedReader in;
+@@ -28,9 +26,7 @@
+         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+         out = new PrintWriter(socket.getOutputStream(), true);
+ 
+-        // Layout GUI
+-        messageLabel.setBackground(Color.lightGray);
+-        frame.getContentPane().add(messageLabel, "South");
++
+ 
+         JPanel boardPanel = new JPanel();
+         boardPanel.setBackground(Color.black);
+Index: src/Server/ServerSideGame.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package Server;\n\nclass ServerSideGame {\n\n    /**\n     * A board has nine squares. Each square is either unowned or\n     * it is owned by a player. So we use a simple array of player\n     * references. If null, the corresponding square is unowned,\n     * otherwise the array cell stores a reference to the player that\n     * owns it.\n     */\n    private ServerSidePlayer[] board = {\n            null, null, null,\n            null, null, null,\n            null, null, null};\n\n    /**\n     * The current player.\n     */\n    ServerSidePlayer currentPlayer;\n\n    /**\n     * Returns whether the current state of the board is such that one\n     * of the players is a winner.\n     */\n    public boolean hasWinner() {\n        return\n                (board[0] != null && board[0] == board[1] && board[0] == board[2])\n                        ||(board[3] != null && board[3] == board[4] && board[3] == board[5])\n                        ||(board[6] != null && board[6] == board[7] && board[6] == board[8])\n                        ||(board[0] != null && board[0] == board[3] && board[0] == board[6])\n                        ||(board[1] != null && board[1] == board[4] && board[1] == board[7])\n                        ||(board[2] != null && board[2] == board[5] && board[2] == board[8])\n                        ||(board[0] != null && board[0] == board[4] && board[0] == board[8])\n                        ||(board[2] != null && board[2] == board[4] && board[2] == board[6]);\n    }\n\n    /**\n     * Returns whether there are no more empty squares.\n     */\n    public boolean boardFilledUp() {\n        for (int i = 0; i < board.length; i++) {\n            if (board[i] == null) {\n                return false;\n            }\n        }\n        return true;\n    }\n\n    /**\n     * Called by the player threads when a player tries to make a\n     * move. This method checks to see if the move is legal: that\n     * is, the player requesting the move must be the current player\n     * and the square in which she is trying to move must not already\n     * be occupied. If the move is legal the game state is updated\n     * (the square is set and the next player becomes current) and\n     * the other player is notified of the move so it can update its\n     * client.\n     */\n    public synchronized boolean legalMove(int location, ServerSidePlayer player) {\n        if (player == currentPlayer && board[location] == null) {\n            board[location] = currentPlayer;\n            currentPlayer = currentPlayer.getOpponent();\n            currentPlayer.otherPlayerMoved(location);\n            return true;\n        }\n        return false;\n    }\n\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/Server/ServerSideGame.java b/src/Server/ServerSideGame.java
+--- a/src/Server/ServerSideGame.java	(revision 5f895cc2a534cf6fc9ee54b063fdc09c3df64c1a)
++++ b/src/Server/ServerSideGame.java	(date 1669124726752)
+@@ -1,70 +1,11 @@
+ package Server;
+ 
+ class ServerSideGame {
+-
+-    /**
+-     * A board has nine squares. Each square is either unowned or
+-     * it is owned by a player. So we use a simple array of player
+-     * references. If null, the corresponding square is unowned,
+-     * otherwise the array cell stores a reference to the player that
+-     * owns it.
+-     */
+-    private ServerSidePlayer[] board = {
+-            null, null, null,
+-            null, null, null,
+-            null, null, null};
+-
+-    /**
+-     * The current player.
+-     */
+     ServerSidePlayer currentPlayer;
+ 
+-    /**
+-     * Returns whether the current state of the board is such that one
+-     * of the players is a winner.
+-     */
+-    public boolean hasWinner() {
+-        return
+-                (board[0] != null && board[0] == board[1] && board[0] == board[2])
+-                        ||(board[3] != null && board[3] == board[4] && board[3] == board[5])
+-                        ||(board[6] != null && board[6] == board[7] && board[6] == board[8])
+-                        ||(board[0] != null && board[0] == board[3] && board[0] == board[6])
+-                        ||(board[1] != null && board[1] == board[4] && board[1] == board[7])
+-                        ||(board[2] != null && board[2] == board[5] && board[2] == board[8])
+-                        ||(board[0] != null && board[0] == board[4] && board[0] == board[8])
+-                        ||(board[2] != null && board[2] == board[4] && board[2] == board[6]);
+-    }
++
+ 
+-    /**
+-     * Returns whether there are no more empty squares.
+-     */
+-    public boolean boardFilledUp() {
+-        for (int i = 0; i < board.length; i++) {
+-            if (board[i] == null) {
+-                return false;
+-            }
+-        }
+-        return true;
+-    }
+ 
+-    /**
+-     * Called by the player threads when a player tries to make a
+-     * move. This method checks to see if the move is legal: that
+-     * is, the player requesting the move must be the current player
+-     * and the square in which she is trying to move must not already
+-     * be occupied. If the move is legal the game state is updated
+-     * (the square is set and the next player becomes current) and
+-     * the other player is notified of the move so it can update its
+-     * client.
+-     */
+-    public synchronized boolean legalMove(int location, ServerSidePlayer player) {
+-        if (player == currentPlayer && board[location] == null) {
+-            board[location] = currentPlayer;
+-            currentPlayer = currentPlayer.getOpponent();
+-            currentPlayer.otherPlayerMoved(location);
+-            return true;
+-        }
+-        return false;
+-    }
++
+ 
+ }
